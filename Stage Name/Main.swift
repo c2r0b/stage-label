@@ -19,12 +19,12 @@ class WindowListViewModel: ObservableObject {
     @Published var windowDetails: [WindowInfo] = []
     @Published var groupedWindows: [[WindowInfo]] = []
     var invisibleWindows: [InvisibleWindow] = []
-    var textFieldValues: [UUID: String] = [:]
+    var textFieldValues: [String: String] = [:]
     
     @Published var textFieldColor: Color = .white
     @Published var backgroundColor: Color = .black
     @Published var backgroundOpacity: Double = 1.0 // Default to full opacity
-    
+    @Published var textFieldSize: CGFloat = 14
     @Published var isFadeEnabled = true
     
     var isStageMangerVisible: [String: Bool] = [:]
@@ -54,10 +54,28 @@ class WindowListViewModel: ObservableObject {
             self?.checkAccessibilityPermissions()
         }
         
+        loadTextFieldValues()
+        loadTextFieldSize()
         loadColors()
         startWindowChangeMonitoring()
         fetchWindows()
     }
+    
+    // Method to save the textFieldValues dictionary
+    func saveTextFieldValues() {
+        if let encoded = try? JSONEncoder().encode(textFieldValues) {
+            print("Saved textFields")
+            UserDefaults.standard.set(encoded, forKey: "textFieldValues")
+        }
+    }
+
+    // Method to load the textFieldValues dictionary
+    func loadTextFieldValues() {
+            if let savedData = UserDefaults.standard.data(forKey: "textFieldValues"),
+               let decodedDictionary = try? JSONDecoder().decode([String: String].self, from: savedData) {
+                textFieldValues = decodedDictionary
+            }
+        }
     
     deinit {
         permissionCheckTimer?.invalidate()
@@ -205,6 +223,19 @@ class WindowListViewModel: ObservableObject {
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(windowDidChange), name: NSWorkspace.didLaunchApplicationNotification, object: nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(windowDidChange), name: NSWorkspace.didTerminateApplicationNotification, object: nil)
 
+    }
+    
+    func saveTextFieldSize() {
+        print("Save font size")
+        UserDefaults.standard.set(textFieldSize, forKey: "textFieldSize")
+    }
+
+    func loadTextFieldSize() {
+        print("Load font size")
+        textFieldSize = UserDefaults.standard.double(forKey: "textFieldSize")
+        if textFieldSize == 0 {
+            textFieldSize = 14  // Default size
+        }
     }
     
     func saveColors() {
@@ -404,12 +435,16 @@ class WindowListViewModel: ObservableObject {
     }
     
     func createInvisibleWindowsForGroups() {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [self] in
+            var groupCounter = 1
             // Update existing windows or create new ones
             for group in self.groupedWindows {
-                guard let groupId = group.first?.groupId else { continue }
-                let existingText = self.textFieldValues[groupId] ?? "Stage"
-
+                guard let groupId = group.first?.groupId,
+                      let identifier = groupIdentifierMapping.first(where: { $1 == groupId })?.key else { continue }
+                
+                let existingText = self.textFieldValues[identifier] ?? "Stage \(groupCounter)"
+                groupCounter += 1
+                
                 guard let windowInfo = group.first,
                       let screen = self.getScreenWithMaxIntersection(for: windowInfo) else { continue }
                 

@@ -14,34 +14,48 @@ struct SettingsView: View {
         TabView {
             // Appearance Tab
             VStack {
-                VStack {
-                    Text("Text Color")
-                    ColorSlider(selectedColor: $viewModel.textFieldColor)
-                        .onChange(of: viewModel.textFieldColor) { _ in
-                            viewModel.saveColors()
-                            viewModel.updateAllTextFieldStyles()
-                        }
-                        .padding()
+                HStack {
+                    VStack {
+                        Text("Text Color")
+                        ColorSlider(selectedColor: $viewModel.textFieldColor)
+                            .onChange(of: viewModel.textFieldColor) { _ in
+                                viewModel.saveColors()
+                                viewModel.updateAllTextFieldStyles()
+                            }
+                            .padding()
+                    }
+                    
+                    VStack {
+                        Text("Text Size")
+                        Slider(value: $viewModel.textFieldSize, in: 12...24)
+                            .onChange(of: viewModel.textFieldSize) { _ in
+                                viewModel.saveTextFieldSize()
+                                viewModel.updateAllTextFieldStyles()
+                            }
+                            .padding()
+                    }
                 }
-
-                VStack {
-                    Text("Background Color")
-                    ColorSlider(selectedColor: $viewModel.backgroundColor)
-                        .onChange(of: viewModel.backgroundColor) { _ in
-                            viewModel.saveColors()
-                            viewModel.updateAllTextFieldStyles()
-                        }
-                        .padding()
-                }
-            
-                VStack {
-                    Text("Background Opacity")
-                    Slider(value: $viewModel.backgroundOpacity, in: 0.0...1.0)
-                        .onChange(of: viewModel.backgroundOpacity) { _ in
-                            viewModel.saveOpacity()
-                            viewModel.updateAllTextFieldStyles()
-                        }
-                        .padding()
+                    
+                HStack {
+                    VStack {
+                        Text("Background Color")
+                        ColorSlider(selectedColor: $viewModel.backgroundColor)
+                            .onChange(of: viewModel.backgroundColor) { _ in
+                                viewModel.saveColors()
+                                viewModel.updateAllTextFieldStyles()
+                            }
+                            .padding()
+                    }
+                        
+                    VStack {
+                        Text("Background Opacity")
+                        Slider(value: $viewModel.backgroundOpacity, in: 0.0...1.0)
+                            .onChange(of: viewModel.backgroundOpacity) { _ in
+                                viewModel.saveOpacity()
+                                viewModel.updateAllTextFieldStyles()
+                            }
+                            .padding()
+                    }
                 }
                 
                 Toggle("Enable Fade Effect", isOn: $viewModel.isFadeEnabled)

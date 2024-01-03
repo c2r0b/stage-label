@@ -46,11 +46,13 @@ class InvisibleWindow: NSWindow, NSTextFieldDelegate {
         textField.isBordered = viewModel.backgroundColor != .clear
         textField.drawsBackground = viewModel.backgroundColor != .clear
         textField.backgroundColor = viewModel.backgroundColor.nsColor.withAlphaComponent(CGFloat(viewModel.backgroundOpacity))
+        textField.font = NSFont.systemFont(ofSize: viewModel.textFieldSize)
+        textField.frame.size.height = viewModel.textFieldSize + 8
     }
     
     private func setupTextField(with label: String, frame: NSRect) {
         // Define the height for the text field
-        let textFieldHeight: CGFloat = 22  // Adjust this height to match your font size
+        let textFieldHeight: CGFloat = viewModel.textFieldSize + 8  // Adjust this height to match your font size
         let horizontalPadding: CGFloat = 10  // Horizontal padding
 
         // Create the text field
@@ -58,7 +60,7 @@ class InvisibleWindow: NSWindow, NSTextFieldDelegate {
         textField.stringValue = label
         textField.isEditable = true
         textField.focusRingType = .none
-        textField.font = NSFont.systemFont(ofSize: 14)
+        textField.font = NSFont.systemFont(ofSize: viewModel.textFieldSize)
         textField.alignment = .left  // Align text to the left
         textField.delegate = self
         textField.target = self
@@ -109,8 +111,13 @@ class InvisibleWindow: NSWindow, NSTextFieldDelegate {
 
     func controlTextDidChange(_ obj: Notification) {
         print("Text changed")
-        let updatedText = textField.stringValue
-        viewModel.textFieldValues[groupId] = updatedText
+        if let textField = obj.object as? NSTextField, let window = textField.window as? InvisibleWindow {
+            let updatedText = textField.stringValue
+            if let identifier = viewModel.groupIdentifierMapping.first(where: { $1 == window.groupId })?.key {
+                viewModel.textFieldValues[identifier] = updatedText
+                viewModel.saveTextFieldValues()
+            }
+        }
     }
     
     func isOnScreen(_ screenFrame: CGRect) -> Bool {

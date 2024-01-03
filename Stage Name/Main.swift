@@ -443,7 +443,9 @@ class WindowListViewModel: ObservableObject {
                       let identifier = groupIdentifierMapping.first(where: { $1 == groupId })?.key else { continue }
                 
                 let existingText = self.textFieldValues[identifier] ?? "Stage \(groupCounter)"
-                groupCounter += 1
+                if (self.textFieldValues[identifier] == nil) {
+                    groupCounter += 1
+                }
                 
                 guard let windowInfo = group.first,
                       let screen = self.getScreenWithMaxIntersection(for: windowInfo) else { continue }

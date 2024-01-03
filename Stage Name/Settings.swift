@@ -13,7 +13,9 @@ struct SettingsView: View {
     var body: some View {
         TabView {
             // Appearance Tab
-            VStack {
+            VStack(spacing: 5) {
+                Spacer()
+                
                 HStack {
                     VStack {
                         Text("Text Color")
@@ -22,8 +24,8 @@ struct SettingsView: View {
                                 viewModel.saveColors()
                                 viewModel.updateAllTextFieldStyles()
                             }
-                            .padding()
                     }
+                    .padding(.trailing)
                     
                     VStack {
                         Text("Text Size")
@@ -32,9 +34,10 @@ struct SettingsView: View {
                                 viewModel.saveTextFieldSize()
                                 viewModel.updateAllTextFieldStyles()
                             }
-                            .padding()
                     }
                 }
+                
+                Spacer()
                     
                 HStack {
                     VStack {
@@ -44,8 +47,8 @@ struct SettingsView: View {
                                 viewModel.saveColors()
                                 viewModel.updateAllTextFieldStyles()
                             }
-                            .padding()
                     }
+                    .padding(.trailing)
                         
                     VStack {
                         Text("Background Opacity")
@@ -54,15 +57,17 @@ struct SettingsView: View {
                                 viewModel.saveOpacity()
                                 viewModel.updateAllTextFieldStyles()
                             }
-                            .padding()
                     }
                 }
+                
+                Spacer()
                 
                 Toggle("Enable Fade Effect", isOn: $viewModel.isFadeEnabled)
                     .onChange(of: viewModel.isFadeEnabled) { newValue in
                         viewModel.isFadeEnabled = newValue
                     }
                     .padding()
+                Spacer()
             }
             .tabItem {
                 Label("Appearance", systemImage: "paintbrush")

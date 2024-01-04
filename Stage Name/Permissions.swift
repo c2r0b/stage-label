@@ -26,10 +26,6 @@ struct PermissionsView: View {
                 Button(action: viewModel.openSystemPreferencesAccessibility) {
                     Text("Grant Accessibility Permissions")
                         .bold()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
                 }
             } else {
                 Label("Accessibility Permissions Granted", systemImage: "checkmark.circle.fill")

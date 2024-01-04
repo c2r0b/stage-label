@@ -41,6 +41,9 @@ class WindowListViewModel: ObservableObject {
     // Track the screens of the windows
     private var windowScreens: [Int: Swindler.Screen] = [:]
     
+    // Mode for when a Stage Manager managed app icon is clicked
+    @Published var isZoomedMode: Bool = false
+    
     @Published var isAccessibilityPermissionGranted = false
     
     init() {
@@ -115,7 +118,8 @@ class WindowListViewModel: ObservableObject {
         state.on { (event: WindowFrameChangedEvent) in
                 let window = event.window
             let screenFrame = window.screen?.applicationFrame
-
+            
+            print("Icon clicked?: \(window.title.value)")
                 // Check if the window overlaps with the stage manager area
             if self.isLikelyOnStageManagerArea(x: window.frame.value.origin.x - (screenFrame?.origin.x)!,
                                                y: window.frame.value.origin.y - (screenFrame?.origin.y)!,
@@ -141,12 +145,34 @@ class WindowListViewModel: ObservableObject {
                 }
                 }
         
-        state.on { (event: ScreenLayoutChangedEvent) in
-            guard event.external == true else {
+        state.on { [weak self] (event: FrontmostApplicationChangedEvent) in
+            guard event.external == true, let self = self else {
                 // Ignore events that were caused by us.
                 return
             }
-            print("Swindler layout changed event")
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { // Adjust the delay as needed
+                let options = CGWindowListOption(arrayLiteral: .optionOnScreenOnly, .excludeDesktopElements)
+                if let windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [NSDictionary] {
+                    for window in windowList {
+                        if let name = window[kCGWindowOwnerName as String] as? String,
+                           let pid = window[kCGWindowOwnerPID as String] as? Int,
+                           let bounds = window[kCGWindowBounds as String] as? NSDictionary,
+                           let x = bounds["X"] as? CGFloat,
+                           let y = bounds["Y"] as? CGFloat,
+                           let width = bounds["Width"] as? CGFloat,
+                           let height = bounds["Height"] as? CGFloat {
+                            if (pid == event.oldValue!.processIdentifier) {
+                                print("Frontmost changed, windows: \(name), \(width)")
+                                if self.isLikelyStageManagerGroup(x: x, y: y, width: width, height: height) {
+                                    print("Old application is now likely a Stage Manager group: \(name) \(width)")
+                                    self.windowDidChange()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     

@@ -14,27 +14,6 @@ struct PermissionsView: View {
     var body: some View {
         VStack(spacing: 10) {
             Spacer()
-
-            Text("Accessibility")
-                .font(.headline)
-                .padding(.top)
-
-            Text("To manage windows effectively, accessibility permissions are required.")
-                .multilineTextAlignment(.center)
-
-            if !viewModel.isAccessibilityPermissionGranted {
-                Button(action: viewModel.openSystemPreferencesAccessibility) {
-                    Text("Grant Accessibility Permissions")
-                        .bold()
-                }
-            } else {
-                Label("Accessibility Permissions Granted", systemImage: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-            }
-            
-            Spacer()
-            Divider()
-            Spacer()
             
             Text("Startup")
                 .font(.headline)

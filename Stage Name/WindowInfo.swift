@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WindowInfo: Identifiable {
-    let id = UUID()  // Unique identifier for the window
+    let id: CGWindowID  // Unique identifier for the window
     var groupId: UUID // Identifier for the group
     let name: String
     let pid: Int

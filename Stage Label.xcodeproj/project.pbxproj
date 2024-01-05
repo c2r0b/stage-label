@@ -15,7 +15,6 @@
 		4C079DF82B38A752006A5FEA /* Stage_NameUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C079DF72B38A752006A5FEA /* Stage_NameUITests.swift */; };
 		4C079DFA2B38A752006A5FEA /* Stage_NameUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C079DF92B38A752006A5FEA /* Stage_NameUITestsLaunchTests.swift */; };
 		4C47A05D2B4473C1007E5CB1 /* ColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C47A05C2B4473C1007E5CB1 /* ColorPicker.swift */; };
-		4CD89D2B2B44858D007936E8 /* Swindler in Frameworks */ = {isa = PBXBuildFile; productRef = 4CD89D2A2B44858D007936E8 /* Swindler */; };
 		4CD89D2E2B45BFAE007936E8 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 4CD89D2D2B45BFAE007936E8 /* LaunchAtLogin */; };
 		4CD89D302B45CC0E007936E8 /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD89D2F2B45CC0E007936E8 /* Permissions.swift */; };
 		4CD89D322B45CC5B007936E8 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD89D312B45CC5B007936E8 /* Settings.swift */; };
@@ -83,7 +82,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CD89D2E2B45BFAE007936E8 /* LaunchAtLogin in Frameworks */,
-				4CD89D2B2B44858D007936E8 /* Swindler in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,7 +193,6 @@
 			);
 			name = "Stage Label";
 			packageProductDependencies = (
-				4CD89D2A2B44858D007936E8 /* Swindler */,
 				4CD89D2D2B45BFAE007936E8 /* LaunchAtLogin */,
 			);
 			productName = "Stage Name";
@@ -494,6 +491,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Stage-Label-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -523,6 +521,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Stage-Label-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -670,11 +669,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		4CD89D2A2B44858D007936E8 /* Swindler */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4C47A0592B447162007E5CB1 /* XCRemoteSwiftPackageReference "Swindler" */;
-			productName = Swindler;
-		};
 		4CD89D2D2B45BFAE007936E8 /* LaunchAtLogin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4CD89D2C2B45BFAE007936E8 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;

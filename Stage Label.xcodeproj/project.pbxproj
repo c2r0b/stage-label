@@ -268,7 +268,6 @@
 			);
 			mainGroup = 4C079DCF2B38A74F006A5FEA;
 			packageReferences = (
-				4C47A0592B447162007E5CB1 /* XCRemoteSwiftPackageReference "Swindler" */,
 				4CD89D2C2B45BFAE007936E8 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 			);
 			productRefGroup = 4C079DD92B38A74F006A5FEA /* Products */;
@@ -484,7 +483,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Stage Name/Stage_Name.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"Stage Name/Preview Content\"";
 				DEVELOPMENT_TEAM = F7WM945VT8;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -514,7 +513,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Stage Name/Stage_Name.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"Stage Name/Preview Content\"";
 				DEVELOPMENT_TEAM = F7WM945VT8;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -650,14 +649,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4C47A0592B447162007E5CB1 /* XCRemoteSwiftPackageReference "Swindler" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/tmandry/Swindler.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 		4CD89D2C2B45BFAE007936E8 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";

@@ -75,7 +75,7 @@ struct SettingsView: View {
             .padding()
             
             
-            PermissionsView(viewModel: viewModel)
+            PermissionsView()
                 .tabItem {
                     Label("Permissions", systemImage: "key")
                 }

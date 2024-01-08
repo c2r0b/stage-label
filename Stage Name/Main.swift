@@ -41,12 +41,14 @@ class WindowListViewModel: ObservableObject {
     private var updating: Bool = false
     
     init() {
-        loadTextFieldValues()
-        loadTextFieldSize()
-        loadColors()
-        startWindowChangeMonitoring()
-        fetchWindows()
-        startPolling()
+        DispatchQueue.main.async {
+            self.loadTextFieldValues()
+            self.loadTextFieldSize()
+            self.loadColors()
+            self.startWindowChangeMonitoring()
+            self.fetchWindows()
+            self.startPolling()
+        }
     }
     
     private func startPolling() {
@@ -142,10 +144,8 @@ class WindowListViewModel: ObservableObject {
                          let isStageManaged = self.isLikelyStageManagerGroup(x: x, y:y, width: width, height: height)
                          self.wasWindowStageManaged[windowID] = isStageManaged
                          
-                         print("Checking minimized \(name) \(wasStageManaged ?? false) \(isStageManaged)")
-                         
                         // Check if the minimized state changed
-                         if wasStageManaged ?? false == false, isStageManaged == true {
+                         if wasStageManaged != isStageManaged {
                              print("Window \(name) minimized state changed")
                              self.windowDidChange()
                              return
@@ -254,12 +254,14 @@ class WindowListViewModel: ObservableObject {
                         if self.isLikelyStageManagerGroup(x: x, y: y, width: width, height: height) {
                             print("New application was likely a Stage Manager group: \(name) \(width)")
                             self.windowDidChange()
+                            return
                         }
                 }
         }
         
         // Check if the previously focused app is now in stage manager
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.lastActiveAppPID = currentPid
             for window in self.filterWindowsOnActiveScreen(windows: self.getWindowsFromPID(pid: self.lastActiveAppPID)) {
                     if let name = window[kCGWindowOwnerName as String] as? String,
                        let (x, y, width, height) = self.getWindowPosition(window: window) {
@@ -268,10 +270,10 @@ class WindowListViewModel: ObservableObject {
                             if self.isLikelyStageManagerGroup(x: x, y: y, width: width, height: height) {
                                 print("Old application is now likely a Stage Manager group: \(name) \(width)")
                                 self.windowDidChange()
+                                return
                             }
                     }
                 }
-            self.lastActiveAppPID = currentPid
         }
     }
         
@@ -395,15 +397,12 @@ class WindowListViewModel: ObservableObject {
             os_log("Fetching windows on background thread")
             
             var details: [WindowInfo] = []
-            let options = CGWindowListOption(arrayLiteral: .optionOnScreenOnly, .excludeDesktopElements)
-            if let windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [NSDictionary] {
+            if let windowList = self.getAllWindows() {
                 for window in windowList {
                     if let windowID = window[kCGWindowNumber as String] as? CGWindowID,
                        let name = window[kCGWindowOwnerName as String] as? String,
                        let pid = window[kCGWindowOwnerPID as String] as? Int,
-                       let (x, y, width, height) = self.getWindowPosition(window: window),
-                       let layer = window[kCGWindowLayer as String] as? Int,
-                       layer <= 0, width > 10, height > 10 {
+                       let (x, y, width, height) = self.getWindowPosition(window: window) {
                                 
                             // Save window screen
                             let windowScreen = self.getWindowScreen(window: window)
@@ -429,7 +428,7 @@ class WindowListViewModel: ObservableObject {
                 self.groupedWindows = []
                 
                 self.windowDetails = details
-                self.groupedWindows = self.groupWindowsByProximity()
+                self.groupedWindows = self.groupWindowsByOverlap()
                 self.createInvisibleWindowsForGroups()
                 self.updating = false
             }
@@ -450,7 +449,7 @@ class WindowListViewModel: ObservableObject {
         let thresholdWidth: CGFloat = 300 // Example threshold for width
         return NSScreen.screens.contains(where: { screen in
             let screenBounds = screen.frame
-            let leftSideThreshold: CGFloat = screenBounds.origin.x + (screenBounds.width / 4)
+            let leftSideThreshold: CGFloat = screenBounds.origin.x + 20
             return width <= thresholdWidth && x <= leftSideThreshold
         })
     }
@@ -463,51 +462,63 @@ class WindowListViewModel: ObservableObject {
         }
 
     private func identifyGroup(for group: [WindowInfo]) -> String {
-        var ids: String = ""
-        for window in group {
-            ids = "\(ids)-\(window.id)"
-        }
-        return ids
+        let sortedIDs = group.map { $0.id }.sorted().map { String($0) }
+        return sortedIDs.joined(separator: "-")
     }
     
-    private func groupWindowsByProximity() -> [[WindowInfo]] {
-        let proximityThreshold: CGFloat = 80 // Define your threshold here
+    private func groupWindowsByOverlap() -> [[WindowInfo]] {
         var groups: [[WindowInfo]] = []
-        var visited: Set<Int> = []
-
-        for (index, window) in windowDetails.enumerated() {
-            if visited.contains(index) { continue }
-
-            var group: [WindowInfo] = [window]
-            visited.insert(index)
-
-            for (otherIndex, otherWindow) in windowDetails.enumerated() {
-                if visited.contains(otherIndex) { continue }
-
-                let distance = distanceBetween(window.center, otherWindow.center)
-                let windowFrame = NSRect(x: window.x, y: window.y, width: window.width, height: window.height)
-                let otherWindowFrame = NSRect(x: otherWindow.x, y: otherWindow.y, width: otherWindow.width, height: otherWindow.height)
-
-                // Check if the windows are within proximity and intersect on the screen
-                if distance <= proximityThreshold && windowFrame.intersects(otherWindowFrame) {
-                    group.append(otherWindow)
-                    visited.insert(otherIndex)
+        
+        // Step 1: Identify all pairs of overlapping windows
+        var overlaps = [(Int, Int)]()
+        for i in 0..<windowDetails.count {
+            for j in (i+1)..<windowDetails.count {
+                let windowFrame1 = NSRect(x: windowDetails[i].x, y: windowDetails[i].y, width: windowDetails[i].width, height: windowDetails[i].height)
+                let windowFrame2 = NSRect(x: windowDetails[j].x, y: windowDetails[j].y, width: windowDetails[j].width, height: windowDetails[j].height)
+                if windowFrame1.intersects(windowFrame2) {
+                    overlaps.append((i, j))
                 }
             }
-            group.sort(by: { $0.id < $1.id })
-            groups.append(group)
         }
 
+        // Step 2: Group windows using a union-find algorithm
+        var parent = Array(0..<windowDetails.count) // Each window initially in its own group
+        func find(_ i: Int) -> Int {
+            if parent[i] != i {
+                parent[i] = find(parent[i])
+            }
+            return parent[i]
+        }
+        func union(_ i: Int, _ j: Int) {
+            parent[find(i)] = find(j)
+        }
+        for (i, j) in overlaps {
+            union(i, j)
+        }
+
+        // Step 3: Create final groups
+        var groupDict = [Int: [WindowInfo]]()
+        for (index, window) in windowDetails.enumerated() {
+            let groupId = find(index)
+            groupDict[groupId, default: []].append(window)
+        }
+        groups = Array(groupDict.values)
         
+        // Sort each group by window ID
+        for i in 0..<groups.count {
+            groups[i].sort(by: { $0.id < $1.id })
+        }
+
+        // Assign group identifiers
         var updatedGroups: [[WindowInfo]] = []
         for group in groups {
             let identifier = identifyGroup(for: group)
             let groupId: UUID
 
             if let existingGroupId = self.groupIdentifierMapping[identifier] {
-                groupId = existingGroupId // Use existing groupId
+                groupId = existingGroupId
             } else {
-                groupId = UUID() // Create a new groupId
+                groupId = UUID()
                 self.groupIdentifierMapping[identifier] = groupId
             }
 
@@ -519,7 +530,9 @@ class WindowListViewModel: ObservableObject {
 
             updatedGroups.append(updatedGroup)
         }
-
+        
+        // sort group by identifier
+        updatedGroups.sort(by: { identifyGroup(for: $0) < identifyGroup(for: $1) })
 
         return updatedGroups
     }
@@ -538,17 +551,16 @@ class WindowListViewModel: ObservableObject {
         DispatchQueue.main.async { [self] in
             var groupCounter = 1
             // Update existing windows or create new ones
-            for group in self.groupedWindows {
+            for group in self.self.groupedWindows {
                 guard let groupId = group.first?.groupId,
                       let identifier = groupIdentifierMapping.first(where: { $1 == groupId })?.key else { continue }
+                print("Identify \(groupId) as \(identifier) with text \( String(describing: self.textFieldValues[identifier]))")
                 
                 let existingText = self.textFieldValues[identifier] ?? "Stage \(groupCounter)"
-                if (self.textFieldValues[identifier] == nil) {
-                    groupCounter += 1
-                }
+                groupCounter += 1
                 
                 // Select the window with the lowest y at the bottom
-                let windowInfo = group.min(by: { $0.y > $1.y })
+                let windowInfo = group.max(by: { $0.y < $1.y })
                 
                 guard let selectedWindowInfo = windowInfo,
                       let screen = self.getScreenWithMaxIntersection(for: selectedWindowInfo) else { continue }
@@ -609,7 +621,7 @@ class WindowListViewModel: ObservableObject {
         )
 
         let isPrimaryScreen = (screen == self.primaryScreen)
-        let adjustment: CGFloat = isPrimaryScreen ? -15 : 215
+        let adjustment: CGFloat = isPrimaryScreen ? 0 : 235
         labelFrame.origin.y = screen.frame.origin.y + screen.frame.size.height - labelFrame.maxY - adjustment
 
         return labelFrame

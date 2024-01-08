@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WindowInfo: Identifiable {
+struct WindowInfo: Identifiable, Hashable {
     let id: CGWindowID  // Unique identifier for the window
     var groupId: UUID // Identifier for the group
     let name: String
@@ -26,5 +26,13 @@ extension WindowInfo {
     func screen() -> NSScreen? {
         let windowCenter = self.center
         return NSScreen.screens.first(where: { $0.frame.contains(windowCenter) })
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id) // Use the unique identifier for hashing
+    }
+    
+    static func ==(lhs: WindowInfo, rhs: WindowInfo) -> Bool {
+        return lhs.id == rhs.id // Two WindowInfos are equal if their IDs are equal
     }
 }

@@ -9,8 +9,6 @@ import SwiftUI
 import LaunchAtLogin
 
 struct PermissionsView: View {
-    @ObservedObject var viewModel: WindowListViewModel
-
     var body: some View {
         VStack(spacing: 10) {
             Spacer()

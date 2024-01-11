@@ -613,21 +613,24 @@ class WindowListViewModel: ObservableObject {
         let windowRect = NSRect(x: windowInfo.x, y: windowInfo.y, width: windowInfo.width, height: windowInfo.height)
         let labelHeight: CGFloat = 25
 
+        // Calculate the Y position of the label
+        let labelYPosition = screen.frame.height - (windowRect.maxY + labelHeight + 5) // 5 is a small buffer
+
         var labelFrame = NSRect(
             x: screen.frame.origin.x,
-            y: windowRect.maxY,
+            y: labelYPosition,
             width: 150,
             height: labelHeight
         )
 
-        let isPrimaryScreen = (screen == self.primaryScreen)
-        let adjustment: CGFloat = isPrimaryScreen ? 0 : 235
-        labelFrame.origin.y = screen.frame.origin.y + screen.frame.size.height - labelFrame.maxY - adjustment
+        // Adjust label frame origin based on the screen origin
+        labelFrame.origin.y += screen.frame.origin.y
 
+        print("\(windowInfo.name) - Label Y Position: \(labelYPosition), Screen Origin Y: \(screen.frame.origin.y), Window MinY: \(windowRect.minY)")
         return labelFrame
     }
 
-
+    
     func getScreenWithMaxIntersection(for windowInfo: WindowInfo) -> NSScreen? {
         let windowRect = NSRect(x: windowInfo.x, y: windowInfo.y, width: windowInfo.width, height: windowInfo.height)
         var maxIntersectionArea: CGFloat = 0.0

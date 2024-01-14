@@ -406,13 +406,13 @@ class WindowListViewModel: ObservableObject {
                                 
                             // Save window screen
                             let windowScreen = self.getWindowScreen(window: window)
-                            print("Window saved screen: \(name) \(String(describing: windowScreen))")
                             self.windowScreen[windowID] = windowScreen
                                         
                             let windowInfo = WindowInfo(id: windowID, groupId: UUID(), name: name, pid: pid, x: x, y: y, width: width, height: height)
                             
                             let isStageManaged = self.isLikelyStageManagerGroup(x: x, y: y, width: width, height: height)
                             self.wasWindowStageManaged[windowID] = isStageManaged
+                            print("Window saved screen: \(name) \(isStageManaged) \(String(describing: windowScreen))")
                             if isStageManaged == true {
                                 print("Window name: \(name), x: \(x), y: \(y), width: \(width), height: \(height)")
                                 details.append(windowInfo)
@@ -449,7 +449,7 @@ class WindowListViewModel: ObservableObject {
         let thresholdWidth: CGFloat = 300 // Example threshold for width
         return NSScreen.screens.contains(where: { screen in
             let screenBounds = screen.frame
-            let leftSideThreshold: CGFloat = screenBounds.origin.x + 20
+            let leftSideThreshold: CGFloat = screenBounds.origin.x + 250
             return width <= thresholdWidth && x <= leftSideThreshold
         })
     }
@@ -479,6 +479,10 @@ class WindowListViewModel: ObservableObject {
                     overlaps.append((i, j))
                 }
             }
+        }
+        
+        for window in windowDetails {
+            print("WindowDetails \(window.name)")
         }
 
         // Step 2: Group windows using a union-find algorithm
@@ -551,7 +555,7 @@ class WindowListViewModel: ObservableObject {
         DispatchQueue.main.async { [self] in
             var groupCounter = 1
             // Update existing windows or create new ones
-            for group in self.self.groupedWindows {
+            for group in self.groupedWindows {
                 guard let groupId = group.first?.groupId,
                       let identifier = groupIdentifierMapping.first(where: { $1 == groupId })?.key else { continue }
                 print("Identify \(groupId) as \(identifier) with text \( String(describing: self.textFieldValues[identifier]))")
@@ -561,6 +565,9 @@ class WindowListViewModel: ObservableObject {
                 
                 // Select the window with the lowest y at the bottom
                 let windowInfo = group.max(by: { $0.y < $1.y })
+                for window in group {
+                    print("Group #\(groupCounter) has windows \(window.name)")
+                }
                 
                 guard let selectedWindowInfo = windowInfo,
                       let screen = self.getScreenWithMaxIntersection(for: selectedWindowInfo) else { continue }
@@ -614,7 +621,15 @@ class WindowListViewModel: ObservableObject {
         let labelHeight: CGFloat = 25
 
         // Calculate the Y position of the label
-        let labelYPosition = screen.frame.height - (windowRect.maxY + labelHeight + 5) // 5 is a small buffer
+        var labelYPosition: CGFloat = 0
+        let screenVerticalCenter = screen.frame.height / 2
+        print("YPOS: \(windowInfo.name) has max \(windowRect.maxY), min \(windowRect.minY), screen center is \(screenVerticalCenter), it is UP? \(windowRect.minY < screenVerticalCenter - 200)")
+        if (windowRect.minY < screenVerticalCenter - 200) {
+            labelYPosition = (screen.frame.height - windowRect.minY - windowRect.height - labelHeight + 5)
+        }
+        else {
+            labelYPosition = screen.frame.height - (windowRect.maxY + labelHeight + 5)
+        }
 
         var labelFrame = NSRect(
             x: screen.frame.origin.x,

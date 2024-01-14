@@ -623,8 +623,8 @@ class WindowListViewModel: ObservableObject {
         // Calculate the Y position of the label
         var labelYPosition: CGFloat = 0
         let screenVerticalCenter = screen.frame.height / 2
-        print("YPOS: \(windowInfo.name) has max \(windowRect.maxY), min \(windowRect.minY), screen center is \(screenVerticalCenter), it is UP? \(windowRect.minY < screenVerticalCenter - 200)")
-        if (windowRect.minY < screenVerticalCenter - 200) {
+        print("YPOS: \(windowInfo.name) has max \(windowRect.maxY), min \(windowRect.minY), screen center is \(screenVerticalCenter), it is UP? \(windowRect.minY < screenVerticalCenter - 100)")
+        if (windowRect.minY < screenVerticalCenter - 100) {
             labelYPosition = (screen.frame.height - windowRect.minY - windowRect.height - labelHeight + 5)
         }
         else {

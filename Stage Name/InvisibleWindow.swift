@@ -12,12 +12,12 @@ class InvisibleWindow: NSWindow, NSTextFieldDelegate {
     private var textField: NSTextField!
     private var allowKeyStatus = false
     public var groupId: UUID
-    private var viewModel: WindowListViewModel
+    private var windowManager: WindowManager
     
 
-    init(label: String, frame: NSRect, groupId: UUID, viewModel: WindowListViewModel) {
+    init(label: String, frame: NSRect, groupId: UUID, windowManager: WindowManager) {
         self.groupId = groupId
-        self.viewModel = viewModel
+        self.windowManager = windowManager
         super.init(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
         self.isOpaque = false
         self.backgroundColor = NSColor.clear
@@ -42,14 +42,14 @@ class InvisibleWindow: NSWindow, NSTextFieldDelegate {
     
     func updateTextFieldAppearance() {
         // Update text field appearance based on the viewModel's colors
-        textField.textColor = viewModel.textFieldColor.nsColor
+        textField.textColor = UserPreferencesManager.shared.textFieldColor.nsColor
         textField.isBordered = false // Remove border
         textField.drawsBackground = false // Do not draw a background
-        textField.font = NSFont.systemFont(ofSize: viewModel.textFieldSize)
-        textField.frame.size.height = viewModel.textFieldSize + 8
+        textField.font = NSFont.systemFont(ofSize: UserPreferencesManager.shared.textFieldSize)
+        textField.frame.size.height = UserPreferencesManager.shared.textFieldSize + 8
         
         // If you need the background, set it to be transparent
-        textField.backgroundColor = viewModel.backgroundColor.nsColor.withAlphaComponent(CGFloat(viewModel.backgroundOpacity))
+        textField.backgroundColor = UserPreferencesManager.shared.backgroundColor.nsColor.withAlphaComponent(CGFloat(UserPreferencesManager.shared.backgroundOpacity))
         
         // Ensure the text field is layered and update its properties
         textField.wantsLayer = true
@@ -61,7 +61,7 @@ class InvisibleWindow: NSWindow, NSTextFieldDelegate {
     
     private func setupTextField(with label: String, frame: NSRect) {
         // Define the height for the text field
-        let textFieldHeight: CGFloat = viewModel.textFieldSize + 8  // Adjust this height to match your font size
+        let textFieldHeight: CGFloat = UserPreferencesManager.shared.textFieldSize + 8  // Adjust this height to match your font size
         let horizontalPadding: CGFloat = 10  // Horizontal padding
 
         // Create the text field
@@ -69,7 +69,7 @@ class InvisibleWindow: NSWindow, NSTextFieldDelegate {
         textField.stringValue = label
         textField.isEditable = true
         textField.focusRingType = .none
-        textField.font = NSFont.systemFont(ofSize: viewModel.textFieldSize)
+        textField.font = NSFont.systemFont(ofSize: UserPreferencesManager.shared.textFieldSize)
         textField.alignment = .left  // Align text to the left
         textField.delegate = self
         textField.target = self
@@ -122,10 +122,10 @@ class InvisibleWindow: NSWindow, NSTextFieldDelegate {
         print("Text changed")
         if let textField = obj.object as? NSTextField, let window = textField.window as? InvisibleWindow {
             let updatedText = textField.stringValue
-            if let identifier = viewModel.groupIdentifierMapping.first(where: { $1 == window.groupId })?.key {
+            if let identifier = windowManager.groupIdentifierMapping.first(where: { $1 == window.groupId })?.key {
                 print("Updating text of \(identifier) as \(updatedText)")
-                viewModel.textFieldValues[identifier] = updatedText
-                viewModel.saveTextFieldValues()
+                UserPreferencesManager.shared.textFieldValues[identifier] = updatedText
+                UserPreferencesManager.shared.saveTextFieldValues()
             }
         }
     }

@@ -4,8 +4,6 @@ An intuitive app designed to enhance Stage Manager on macOS by allowing users to
 
 Written in Swift and SwiftUI, Stage Label is a simple and lightweight app currently built as a working prototype.
 
-[<img src="images/mac-app-store.svg">](https://apps.apple.com/it/app/stage-label/id6475116692)
-
 ## Features
 
 - [x] Add custom labels to each window group on your desktop
@@ -13,10 +11,6 @@ Written in Swift and SwiftUI, Stage Label is a simple and lightweight app curren
 - [x] Custom font size of labels
 - [x] Custom labels opacity
 - [x] Open at login 
-
-## Installation
-
-This app is only distributed through the Mac App Store. You can download it [here](https://apps.apple.com/it/app/stage-label/id6475116692).
 
 ## Contributing
 
@@ -30,7 +24,6 @@ Here are some suggestions for future improvements for which contributions are we
 - [ ] Track labels if a window is added or removed from a group
 - [ ] Solve performance issues when tracking windows for a long time
 - [ ] Save labels to restore them after a restart
-
 
 ## License
 
